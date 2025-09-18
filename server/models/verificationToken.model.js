@@ -16,15 +16,14 @@ const verificationToken = sequelize.define("verificationToken", {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: "users",
+      model: "user",
       key: "id",
     },
   },
-  expiresAt: {
+  expiredAt: {
     type: DataTypes.DATE,
     allowNull: false,
   },
 });
 
-// Export model
 export default verificationToken;

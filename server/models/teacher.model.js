@@ -1,5 +1,5 @@
-import { DataTypes } from "sequelize";
 import User from "./user.model.js";
+import { DataTypes } from "sequelize";
 
 const Teacher = User.init(
   {
@@ -11,13 +11,15 @@ const Teacher = User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    type: {
+      type: DataTypes.STRING,
+      defaultValue: "teacher",
+    },
   },
   {
     scopes: {
       defaultScope: {
-        where: {
-          type: "teacher",
-        },
+        where: { type: "teacher" },
       },
     },
     hooks: {

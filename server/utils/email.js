@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { getVerificationEmailTemplate } from "./emailTemplate.js";
 
 dotenv.config();
-//create gmail Transporter
+//Create Gmail Transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-//Verify SMTP Connection Contifiguration
+//Verify SMTP Connection Configuration
 transporter.verify(function (error, success) {
   if (error) {
     console.error("SMTP Connection Error", error);
@@ -21,29 +21,28 @@ transporter.verify(function (error, success) {
   }
 });
 
-//send verification email
-export const sendVerificationEmail = async (email, token, userName) => {
-  const verificationUrl = `${process.env.BASE_URL}/api/v1/auth/verify/${token}`;
+//Send Verification Email
+export const sendVerificationEmail = async (email, token, username) => {
+  const verficationUrl = `${process.env.BASE_URL}/api/v1/auth/verify/${token}`;
 
-  const mailOptions = {
+  const mailOption = {
     from: {
       name: "ระบบการแข่งขันวันวิทยาศาสตร์",
-      email: process.env.EMAIL_FROM,
+      address: process.env.EMAIL_FROM,
     },
     to: email,
-    subject: "กรุณายืนยันอีเมลของคุณ - ระบบการแข่งขันวันวิทยาศาสตร์",
-    html: getVerificationEmailTemplate(verificationUrl, userName),
-    text: `ยินดีต้อนรับสู่ระบบการแข่งขัยวันวิทยาศาสตร์!\n\nเรียน คุณ${userName}\n\n
-    ขอบคุณที่ลงทะเบียนเข้าร่วมระบบการแข่งขันทางวิทยาศาสตร์ 
-    กรุณายืนยันอีเมลของคุณโดยคลิกลิ้งด้านล่าง \n\n ${verificationUrl}\n\n
-    ลิงก์ยืนยันอีเมลนี้จะหมดอายุภายใน 24 ชั่วโมง หากคุณไม่ได้เป็นผู้ลงทะเบียน 
-    กรุณาละเว้นการคลิกลิงก์นี้\n\n นี่เป็นข้อความตอบอัตโนมัติ กรุราอยย่าตอบกลับอีเมลนี้`,
+    subject: "กรุณายืนยันอีเมลของคุณ - ระบบแข่งขันวันวิทยาศาสตร์",
+    html: getVerificationEmailTemplate(verficationUrl, username),
+    text: `ยินดีต้อนรับสู่ระบบการแข่งขันวันวิทยาศาสตร์!\n\nเรียน คุณ${username},\n\nขอบคุณที่ลงทะเบียนเข้าร่วมระบบการแข่งขันวันวิทยาศาสตร์
+    กรุณายืนยันอีเมลของคุณโดยคลิกที่ลิ้งก์ด้านล่าง \n\n ${verficationUrl} \n\n
+    ลิ้งก์ยืนยันอีเมลจะหมดอายุภายใน 24 ชั่วโมงหากคุณไม่ได้เป็นผู้ลงทะเบียน 
+    กรุณาละเว้นการคลิกลิ้งก์นี้ \n\n นี่เป็นข้อความอัตโนมัติ กรุณาอย่าตอบกลับอีเมลนี้`,
   };
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Verification email sent successfully!");
+    const info = await transporter.sendMail(mailOption);
+    console.log("Verification Email Sent Successfully!");
     return info;
   } catch (error) {
-    console.error("Error sending email", error);
+    console.error("Error Sending Email", error);
   }
 };

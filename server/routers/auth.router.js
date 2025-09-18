@@ -5,6 +5,6 @@ import authController from "../controllers/auth.controller.js";
 router.post("/signup", authController.signUp);
 
 //POST http://localhost:500/api/v1/auth/signup
-// router.post("/signin", authController.signIn);
+//router.post("/signin", authController.signIn);
 
 export default router;

@@ -13,7 +13,7 @@ const signUp = async (req, res) => {
     if (!email || !password || !type || !name) {
       return res
         .status(400)
-        .send({ message: "Email , Password , Type and name are required !" });
+        .send({ message: "Email , Password , Type and Name are required !" });
     }
     //Validate user type
     const allowedTypes = ["admin", "teacher", "judge"];
@@ -43,6 +43,7 @@ const signUp = async (req, res) => {
       email: email,
       password: password,
       type: type,
+      isVerified: false,
     };
     if (type === "teacher") {
       userData.school = school;
@@ -55,19 +56,19 @@ const signUp = async (req, res) => {
     //If user is a teacher, create and send verification email
     if (type === "teacher") {
       try {
-        const token = crypto.randomBytes(30).toString("hex");
+        const token = crypto.randomBytes(32).toString("hex");
         const verification = await db.verificationToken.create({
           token,
           userId: user.id,
           expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         });
-        console.log("Verification token created", verification);
+        console.log("Verification Token Created", verification);
 
-        //TODO Send verification email
+        //TODO Send Verification Email
         await sendVerificationEmail(user.email, token, user.name);
-        console.log("Verification email sent successfully!");
+        console.log("Verification Email Sent Successfully!");
       } catch (error) {
-        console.error("Error sending verification email", error);
+        console.error("Error Sending Verification Email", error);
       }
     }
 
@@ -90,6 +91,16 @@ const signUp = async (req, res) => {
     });
   }
 };
+
+const signup = async (req, res) => {};
+
+const verifyEmail = async (req, res) => { // เขาส่ง Token มาใน URL
+  const { token } = req.params;
+  if (!token) {
+    res.status(400).send({ message: "Token is missing !" }); // หลังจาก เขาส่ง Token มา เราต้องทำอะไรต่อ
+  }
+};
+
 const authController = {
   signUp,
 };

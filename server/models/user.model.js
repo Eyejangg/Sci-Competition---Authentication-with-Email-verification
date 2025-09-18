@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
-import sequelize from "./db.js";
 import bcrypt from "bcryptjs";
+import sequelize from "./db.js";
 
 const User = sequelize.define(
   "user",
@@ -32,10 +32,10 @@ const User = sequelize.define(
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
-      default: false,
-      allowNull: false,
       defaultValue: false,
+      allowNull: false,
     },
+    //Teacher Attribute
     school: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -46,6 +46,7 @@ const User = sequelize.define(
     },
   },
   {
+    freezeTableName: true,
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {

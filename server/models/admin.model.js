@@ -12,7 +12,7 @@ const Admin = User.init(
     },
   },
   {
-    hooks: {
+    hook: {
       beforeCreate: (admin) => {
         admin.type = "admin";
       },
