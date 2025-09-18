@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 const User = db.User;
 import crypto from "crypto";
 import { sendVerificationEmail } from "../utils/email.js";
+import verificationToken from "../models/verificationToken.model.js";
+
+import path from "path"; // เรียกใช้ path 18/9/2568
 
 //Register
 const signUp = async (req, res) => {
@@ -94,10 +97,48 @@ const signUp = async (req, res) => {
 
 const signup = async (req, res) => {};
 
-const verifyEmail = async (req, res) => { // เขาส่ง Token มาใน URL
+const verifyEmail = async (req, res) => {
+  // เขาส่ง Token มาใน URL
   const { token } = req.params;
   if (!token) {
     res.status(400).send({ message: "Token is missing !" }); // หลังจาก เขาส่ง Token มา เราต้องทำอะไรต่อ
+  }
+
+  try {
+    const verification = await db.verificationToken.findOne({
+      // หา Token ในตาราง verificationToken
+
+      where: { token }, // ถ้าเกิดใน js เราลดตัวแปรชื่อเหมือนกัน เราเขียนแค่ token ได้เลย / token:token หรือ token
+    });
+
+    if (!verification) {
+      return res.status(400).send({ message: "Invalid verification Token !" });
+    }
+
+    // Check if token is expired เช็คว่าหมดอายุมั้ย
+
+    if (new Date() > verification.expiredAt) {
+      await verificationToken.destroy(); // ถ้าหมดอายุให้ลบ Token ทิ้ง
+      return res
+        .status(400)
+        .send({ message: "Verification Token has expired" });
+    }
+
+    const user = await User.findByPk(verification.userId); // หา user ที่มี id ตรงกับ userId ในตาราง verificationToken มองเป็น บัตรคอนเสิร์ต
+    if (!user) {
+      return res.status(404).send({ message: "user not found" });
+    }
+
+    await user.update({ isVerified: true }); // อัพเดทสถานะ isVerified เป็น true
+    await verificationToken.destroy(); // ลบ Token ทิ้ง otp ใช้ครั้งเดียว
+
+    // return web view - การต่อ string
+    const htmlPath = path.join(process.cwd(), "view", "verification.html"); // ต่อ โฟลเดอร์ view ตามด้วย verfication.html ชื่อไฟล์
+    res.sendFile(htmlPath);
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message || "Some error accurred while verifying email",
+    });
   }
 };
 
