@@ -31,7 +31,7 @@ const Activity = sequelize.define("activity", {
   },
   date: {
     type: DataTypes.DATE,
-    allowNull: false,
+    required: true,
   },
   location: {
     type: DataTypes.STRING,
@@ -42,7 +42,7 @@ const Activity = sequelize.define("activity", {
     allowNull: false,
   },
   reg_close: {
-    type: DataTypes.STRING,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   contact_name: {
@@ -56,13 +56,23 @@ const Activity = sequelize.define("activity", {
   contact_email: {
     type: DataTypes.STRING,
     allowNull: false,
-    required: true,
-    match: [/^\w+([\.-]?)@\w+([\.-]?\w+)(\.\w(2,3))+$/],
+    match: [
+      /^\w+([\.-]?\w+)*@\w([\.]?\w+)*(\.\w{2,3})+$/,
+      "Please enter a valid email",
+    ],
   },
   status: {
     type: DataTypes.ENUM("draft", "open", "closed", "in_progress", "completed"),
-    allowNull: false,
     default: "draft",
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    default: Date.now,
+  },
+
+  updated_at: {
+    type: DataTypes.DATE,
+    default: Date.now,
   },
 });
 
@@ -71,7 +81,6 @@ Activity.sync({ force: false })
     console.log("Table created or already exists");
   })
   .catch((error) => {
-    console.log("Error creating table", error);
+    console.log("Error created table", error);
   });
-
 export default Activity;

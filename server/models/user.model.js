@@ -35,6 +35,14 @@ const User = sequelize.define(
       default: false, // ถ้ายังไม่ระบุเริ่มต้นที่ False
       allowNull: false,
     },
+    school: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     hook: {

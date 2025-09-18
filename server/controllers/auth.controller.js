@@ -1,35 +1,31 @@
-import jwt from "jsonwebtoken";
-import authConfig from "../config/authConfig.js";
 import db from "../models/index.js";
-import cryto from "crypto";
+import authConfig from "../config/auth.config.js";
+import jwt from "jsonwebtoken";
 const User = db.User;
+import crypto from "crypto";
+import { sendVerificationEmail } from "../utils/email.js";
 
 //Register
 const signUp = async (req, res) => {
-  const { email, password, type, name } = req.body; // signUp บังคับกรอกข้อมูล
+  const { email, password, type, name, school, phone } = req.body;
   try {
+    //Validate request
     if (!email || !password || !type || !name) {
-      // Check Validate Req - มันถูกต้องมั้ย ตรวจสอบ ต้องส่ง 4 fild ให้ก่อนนะ
-      //  ถ้าไม่มี email , password , type , name
       return res
         .status(400)
-        .send({ message: "Email, password, type, and name are Required !!! " });
+        .send({ message: "Email , Password , Type and name are required !" });
     }
-
-    // Validate user type
-    const allowedTypes = ["admin", "teacher", "judge"]; // Check Type  ตรงมั้ย
+    //Validate user type
+    const allowedTypes = ["admin", "teacher", "judge"];
     if (!allowedTypes.includes(type)) {
       return res.status(400).send({
-        message: "Invalid user type. Must be admin, teacher or judge",
+        message: "Invalid user Type. Must be admin, teacher or judge !",
       });
     }
-    //ตรรกะศาสตร์
-    // อันใดอันนึ่งเป็นจริง ถือว่าเป็นจริง
-    //Addition Validation for teacher
     if (type === "teacher" && (!school || !phone)) {
       return res
         .status(400)
-        .send({ message: "school and phone are required for teacher!" });
+        .send({ message: "School and Phone are required for teacher!" });
     }
     //check if user already exists
     const existingUser = await User.findOne({
@@ -38,10 +34,10 @@ const signUp = async (req, res) => {
       },
     });
     if (existingUser) {
-      return res.status(400).send({ message: "Email already in Use!" });
+      return res.status(400).send({ message: "Email already in use!" });
     }
 
-    //Create User object base on type
+    //Create user object base on type
     const userData = {
       name: name,
       email: email,
@@ -49,47 +45,53 @@ const signUp = async (req, res) => {
       type: type,
     };
     if (type === "teacher") {
-      //ถ้าเป็น Teacher
       userData.school = school;
       userData.phone = phone;
     }
 
-    // Create New User
+    //Create new user
     const user = await User.create(userData);
 
-    // if user is a teacher, create and send verification emial
-    // import crypto use crypto
+    //If user is a teacher, create and send verification email
     if (type === "teacher") {
       try {
-        //create verification token
-        const token = crypto.randomBytes(32).toString("hex");
+        const token = crypto.randomBytes(30).toString("hex");
         const verification = await db.VerificationToken.create({
-          userid: user.id,
-          expiredAt: new Date(DateRansfer.now() + 24 * 60 * 60 * 1000), // 24H ตอนนี้ บวกเพิมไปอีก 24 H
+          token,
+          userId: user.id,
+          expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         });
-        //SEND EMAIL !! !! !!
-      } catch (error) {}
+        console.log("Verification token created", verification);
+
+        //TODO Send verification email
+        await sendVerificationEmail(user.email, token, user.name);
+        console.log("Verification email sent successfully!");
+      } catch (error) {
+        console.error("Error sending verification email", error);
+      }
     }
 
-    // ถุ้าเกิดมันเป็นจริง
-    // ถ้า user เป็น teacher จะส่งข้อความยืนยัน และคืนค่า isVerified มาด้วย
     res.status(201).send({
       message:
         user.type === "teacher"
-          ? "Registration Successfully! Please check your Email To Veriy your account"
-          : "User registered successfully",
+          ? "Registration successfully! please check your email to verify your account"
+          : "User registered successfully!",
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         type: user.type,
-        // เพิ่ม isVerified เฉพาะ teacher
-        ...User(user.type === "teacher" && { isVerified: user.isVerified }), // ถ้าเกิดเขาเป็น user เขาจะได้ Verified
+        ...(user.type === "teacher" && { isVerified: user.isVerified }),
       },
     });
   } catch (error) {
     return res.status(500).send({
-      message: error.message || "Some Error occured while creating the user",
+      message: error.message || "Some error occurred while creating the user",
     });
   }
 };
+const authController = {
+  signUp,
+};
+
+export default authController;

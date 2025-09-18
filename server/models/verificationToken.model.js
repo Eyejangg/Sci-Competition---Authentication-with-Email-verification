@@ -17,7 +17,7 @@ const VerificationToken = sequelize.define("verificationToken", {
     type: DataTypes.INTEGER,
     allowNull: false,
     reference: {
-      model: "users",
+      model: "user",
       key: "id",
     },
   },

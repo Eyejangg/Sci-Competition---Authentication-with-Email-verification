@@ -1,20 +1,20 @@
 import jwt from "jsonwebtoken";
-import authconfig from "../config/auth.config.js";
-// import db from "../models/index.js";
-// const User = db.User;
-import User from "../models/user.model.js";
+import authConfig from "../config/auth.config.js";
+import db from "../models/index.js";
+const User = db.User;
 
 const verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
   if (!token) {
-    return res.status(403).send({ message: "No Token Provided!" });
+    return res.status(403).send({ message: "No token provided!" });
   }
-  jwt.verify(token, authconfig.secret, (err, decoded) => {
+
+  jwt.verify(token, authConfig.secret, (err, decoded) => {
     if (err) {
-      return res.status(401).senf({ message: "Unauthorized!" });
+      return res.status(401).send({ message: "Unauthorized!" });
     }
     req.username = decoded.username;
-    next();
+    next(); // ต้องมี
   });
 };
 
@@ -22,7 +22,7 @@ const isAdmin = (req, res, next) => {
   User.findByPk(req.username).then((user) => {
     user.getRoles().then((roles) => {
       for (let i = 0; i < roles.length; i++) {
-        if (roles[i].roleName === "admin") {
+        if (roles[i].name === "admin") {
           next();
           return;
         }
@@ -34,11 +34,11 @@ const isAdmin = (req, res, next) => {
   });
 };
 
-const isModOrAdmin = (req, res, next) => {
+const isManager = (req, res, next) => {
   User.findByPk(req.username).then((user) => {
     user.getRoles().then((roles) => {
       for (let i = 0; i < roles.length; i++) {
-        if (roles[i].roleName === "moderator" ) {
+        if (roles[i].name === "admin" || roles[i].name === "manager") {
           next();
           return;
         }
@@ -49,5 +49,6 @@ const isModOrAdmin = (req, res, next) => {
     });
   });
 };
-const authJwt = { verifyToken, isAdmin, isModOrAdmin };
+
+const authJwt = { verifyToken, isAdmin, isManager };
 export default authJwt;
