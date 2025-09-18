@@ -56,7 +56,7 @@ const signUp = async (req, res) => {
     if (type === "teacher") {
       try {
         const token = crypto.randomBytes(30).toString("hex");
-        const verification = await db.VerificationToken.create({
+        const verification = await db.verificationToken.create({
           token,
           userId: user.id,
           expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000),

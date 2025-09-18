@@ -1,31 +1,30 @@
 import { DataTypes } from "sequelize";
 import sequelize from "./db.js";
 
-const VerificationToken = sequelize.define("verificationToken", {
+const verificationToken = sequelize.define("verificationToken", {
   id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     primaryKey: true,
+    autoIncrement: true,
   },
   token: {
     type: DataTypes.STRING,
-    allowNull: false, // ห้ามเว้นว่าง
-    unique: true, // ห้ามซ้ำ
+    allowNull: false,
+    unique: true,
   },
   userId: {
-    // เป็น FK ของตาราง users key ของเขา หรือ attb ของเขา คือ id !!
     type: DataTypes.INTEGER,
     allowNull: false,
-    reference: {
-      model: "user",
+    references: {
+      model: "users",
       key: "id",
     },
   },
   expiresAt: {
-    // วันที่และเวลา token หมดอายุ
-    type: DataTypes.DATE, // date
+    type: DataTypes.DATE,
     allowNull: false,
   },
 });
 
-export default VerificationToken;
+// Export model
+export default verificationToken;
